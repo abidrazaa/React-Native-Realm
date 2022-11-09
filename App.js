@@ -7,59 +7,84 @@
  */
 
 import React from 'react';
-import type {Node} from 'react';
 import {
   SafeAreaView,
-  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
-  useColorScheme,
-  View,
 } from 'react-native';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import Realm from "realm";
 
-/* $FlowFixMe[missing-local-annot] The type annotation(s) required by Flow's
- * LTI update could not be added via codemod */
-const Section = ({children, title}): Node => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
+const TaskSchema = {
+  name: "Task",
+  properties: {
+    _id: "int",
+    name: "string",
+    status: "string?",
+  },
+  primaryKey: "_id",
 };
 
-const App: () => Node = () => {
-  const isDarkMode = useColorScheme() === 'dark';
+(async () => {
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+  const realm = await Realm.open({
+    path: "myrealm",
+    schema: [TaskSchema],
+  });
+
+  // ### Add a couple of Tasks in a single, atomic transaction
+  // let task1, task2;
+  // realm.write(() => {
+  //   task1 = realm.create("Task", {
+  //     _id: 5,
+  //     name: "go grocery shopping",
+  //     status: "Open",
+  //   });
+
+    // task2 = realm.create("Task", {
+    //   _id: 2,
+    //   name: "go exercise",
+    //   status: "Open",
+    // });
+    // console.log(`created two tasks: ${task1.name}`);
+  // })
+
+  // ### Get data from Realm
+  const tasks = realm.objects("Task");
+  console.log(`The lists of tasks are: ${tasks.map((task) => {
+    return(task.name + "   "+ task.status)
+  })}`);
+
+  // ### filter out data
+  const openTasks = tasks.filtered("status = 'Open'");
+  console.log(
+    `The lists of open tasks are: ${openTasks.map(
+      (openTask) => openTask.name
+    )}`
+  );
+
+  // ### modify an object
+  // realm.write(() => {
+  //   task1.status = "InProgress";
+  // });
+
+  realm.write(()=>{
+    let myTask = realm.objectForPrimaryKey("Task",5) // first parameter is collection and the other is id for that object
+    myTask.status = "Closed"
+  })
+
+  // ### Deletes an object
+  // realm.write(() => {
+  //   realm.delete(task1);
+  //   // Discard the reference.
+  //   task1 = null;
+  // });
+
+})()
+
+
+const App = () => {
 
   return (
     <SafeAreaView style={backgroundStyle}>
@@ -67,30 +92,7 @@ const App: () => Node = () => {
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
         backgroundColor={backgroundStyle.backgroundColor}
       />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.js</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
+      <Text>Hi this is the Realm implementation APK. Check this out.</Text>
     </SafeAreaView>
   );
 };
