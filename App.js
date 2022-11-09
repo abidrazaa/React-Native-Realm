@@ -83,15 +83,9 @@ const TaskSchema = {
 
 })()
 
-
 const App = () => {
-
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
+    <SafeAreaView>
       <Text>Hi this is the Realm implementation APK. Check this out.</Text>
     </SafeAreaView>
   );
